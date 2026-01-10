@@ -8,7 +8,6 @@ import com.shivamdenge.Module4.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,29 +19,32 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class userService implements UserDetailsService {
+public class UserService implements UserDetailsService {
+
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("User Not found with email :" + username));
+        return userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
     }
 
-
     public UserDTO signUp(SignupDTO signupDTO) {
-        Optional<UserEntity> user = userRepository.findByEmail(signupDTO.getEmail());
-        if (user.isPresent()) {
-            throw new BadCredentialsException("User is Already Present with email :" + signupDTO.getEmail());
-        }
 
+        Optional<UserEntity> userEntity = userRepository.findByEmail(signupDTO.getEmail());
+        if (userEntity.isPresent()) throw new BadCredentialsException("User is Already Exist");
 
-        UserEntity tobeCreatedUser = modelMapper.map(signupDTO, UserEntity.class);
-        tobeCreatedUser.setPassword(passwordEncoder.encode(signupDTO.getPassword()));
+        UserEntity user = modelMapper.map(signupDTO, UserEntity.class);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        UserEntity saveUser = userRepository.save(tobeCreatedUser);
+        UserEntity savedUserEntity = userRepository.save(user);
 
-        return modelMapper.map(saveUser, UserDTO.class);
+        return modelMapper.map(savedUserEntity, UserDTO.class);
+
+    }
+
+    public Optional<UserEntity> getUserById(Long userId){
+        return userRepository.findById(userId);
     }
 }

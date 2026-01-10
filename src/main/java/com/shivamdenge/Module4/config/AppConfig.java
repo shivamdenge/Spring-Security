@@ -1,8 +1,13 @@
 package com.shivamdenge.Module4.config;
 
+import io.jsonwebtoken.security.Password;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class AppConfig {
@@ -11,6 +16,18 @@ public class AppConfig {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
+        return configuration.getAuthenticationManager();
+    }
+
+
+   @Bean
+    PasswordEncoder passwordEncoder()
+   {
+       return new BCryptPasswordEncoder();
+   }
 
 
 }

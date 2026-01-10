@@ -1,11 +1,7 @@
 package com.shivamdenge.Module4;
 
-import com.shivamdenge.Module4.entity.UserEntity;
-import com.shivamdenge.Module4.service.JwtService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.User;
 
 @SpringBootTest
 class Module4ApplicationTests {
