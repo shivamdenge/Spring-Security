@@ -34,8 +34,6 @@ public class AuthController {
     }
 
 
-
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response) {
         LoginResponseDTO loginResponseDTO = authService.login(loginDTO);
@@ -48,15 +46,54 @@ public class AuthController {
     }
 
 
-
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDTO> refresh(HttpServletRequest httpServletRequest) {
-        String refreshToken = Arrays.stream(httpServletRequest.getCookies()).filter(
-                        cookie -> "refreshToken".equals(cookie.getName())).findFirst()
-                .map(cookie -> cookie.getValue()).orElseThrow(() ->
-                        new AuthenticationServiceException("Refresh Token Not found Inside Cookies"));
+    public ResponseEntity<LoginResponseDTO> refresh(HttpServletRequest request) {
 
-        LoginResponseDTO loginResponseDTO = authService.refreshToken(refreshToken);
-        return ResponseEntity.ok(loginResponseDTO);
+        // STEP 1:
+        // Get ALL cookies sent by the browser.
+        // Browser automatically sends cookies (frontend does nothing)
+        String refreshToken = Arrays.stream(request.getCookies())
+
+                // STEP 2:
+                // Find the cookie named "refreshToken"
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+
+                // STEP 3:
+                // Extract its value (the JWT string)
+                .findFirst().map(cookie -> cookie.getValue())
+
+                // STEP 4:
+                // If cookie is missing -> user is logged out
+                .orElseThrow(() -> new AuthenticationServiceException("Refresh Token Not found Inside Cookies"));
+
+        // STEP 5:
+        // Pass refresh token to service
+        // Controller does NOT validate token
+        LoginResponseDTO response = authService.refreshToken(refreshToken);
+
+        // STEP 6:
+        // Send new access token back to frontend
+        return ResponseEntity.ok(response);
     }
+
 }
+
+/*
+1. User logs in
+   → gets accessToken + refreshToken
+
+2. User uses app
+   → accessToken sent in headers
+
+3. accessToken expires
+   → backend returns 401
+
+4. Frontend calls /refresh
+   → browser auto-sends refreshToken cookie
+
+5. Backend:
+   → validates refresh token
+   → generates new access token
+
+6. User continues
+*/

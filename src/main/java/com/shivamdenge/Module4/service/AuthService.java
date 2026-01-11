@@ -34,11 +34,34 @@ public class AuthService {
         return new LoginResponseDTO(user.getId(), accessToken, refreshToken);
     }
 
+    /**
+     * This method is called AFTER the user is already logged in once.
+     * It is NOT login. It is token renewal.
+     */
     public LoginResponseDTO refreshToken(String refreshToken) {
+
+        // STEP 1:
+        // Decode the refresh token.
+        // This automatically:
+        // - verifies the JWT signature
+        // - checks if token is expired
+        // - extracts the subject (userId)
         Long userId = jwtService.getUserIdFromToken(refreshToken);
+
+        // STEP 2:
+        // Fetch the user from database using userId
+        // This confirms the user still exists / is valid
         UserEntity user = userService.getUserById(userId);
+
+        // STEP 3:
+        // Generate a BRAND-NEW access token
+        // Old access token was expired
         String accessToken = jwtService.generateAccessToken(user);
 
-        return new LoginResponseDTO(userId,accessToken,refreshToken);
+        // STEP 4:
+        // Return new access token
+        // Refresh token stays SAME
+        return new LoginResponseDTO(userId, accessToken, refreshToken);
     }
+
 }
