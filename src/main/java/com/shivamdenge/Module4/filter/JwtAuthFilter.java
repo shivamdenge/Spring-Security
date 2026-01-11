@@ -38,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Long userId = jwtService.getUserIdFromToken(token);
 
         if (userId != null) {
-            UserEntity user = userService.getUserById(userId).orElseThrow(() -> new ResourceNotFoundException("NO user"));
+            UserEntity user = userService.getUserById(userId);
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(user, null, null);
 

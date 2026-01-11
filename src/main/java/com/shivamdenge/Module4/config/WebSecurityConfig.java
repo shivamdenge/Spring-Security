@@ -19,15 +19,20 @@ public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
-        httpSecurity.authorizeHttpRequests(
-                        auth -> auth.requestMatchers("/auth", "/posts", "/auth/**").permitAll()
-                                .anyRequest().authenticated())
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/posts", "/error", "/auth/**").permitAll()
+//                        .requestMatchers("/posts/**").authenticated()
+                        .anyRequest().authenticated())
                 .csrf(csrfConfig -> csrfConfig.disable())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(sessionConfig ->
-                        sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(sessionConfig -> sessionConfig
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//                .formLogin(Customizer.withDefaults());
+
         return httpSecurity.build();
     }
 }
