@@ -19,6 +19,7 @@ public class AuthService {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final SessionService sessionService;
 
 
     public LoginResponseDTO login(LoginDTO loginDTO) {
@@ -30,6 +31,9 @@ public class AuthService {
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+
+        sessionService.generateSession(user,refreshToken);
+
 
         return new LoginResponseDTO(user.getId(), accessToken, refreshToken);
     }
@@ -47,6 +51,9 @@ public class AuthService {
         // - checks if token is expired
         // - extracts the subject (userId)
         Long userId = jwtService.getUserIdFromToken(refreshToken);
+
+
+        sessionService.validateSession(refreshToken);
 
         // STEP 2:
         // Fetch the user from database using userId
